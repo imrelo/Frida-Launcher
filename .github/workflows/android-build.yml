@@ -1,34 +1,43 @@
-# Khối steps phải được đặt thụt lề ngay dưới job 'build'
-steps:
-  # Bước 1: Tải mã nguồn từ repository
-  - name: Checkout Code
-    uses: actions/checkout@v4
+name: Android CI Build (Frida-Launcher)
 
-  # Bước 2: Thiết lập môi trường Java (JDK 17 là tiêu chuẩn hiện nay cho Android)
-  - name: Set up JDK 17
-    uses: actions/setup-java@v4
-    with:
-      distribution: 'temurin'
-      java-version: '17'
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
-  # Bước 3: Thiết lập Gradle và tự động cache dependencies để tăng tốc độ build
-  - name: Setup Gradle Caching
-    uses: gradle/actions/setup-gradle@v3
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Bước 1: Tải mã nguồn từ repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-  # Bước 4: Cấp quyền thực thi cho Gradle Wrapper
-  - name: Grant Execute Permission to gradlew
-    run: chmod +x gradlew
+      # Bước 2: Thiết lập môi trường Java (JDK 17)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-  # Bước 5: Thực hiện lệnh build Debug APK
-  # Nếu bạn có các file .properties cần thiết, lệnh này sẽ tạo ra app-debug.apk
-  - name: Assemble Debug Build
-    run: ./gradlew assembleDebug
+      # Bước 3: Thiết lập Gradle Caching
+      - name: Setup Gradle Caching
+        uses: gradle/actions/setup-gradle@v3
 
-  # Bước 6: Tải file APK đã build lên làm Artifact (tệp đính kèm)
-  # Bạn có thể tải file này trực tiếp từ trang Actions của GitHub
-  - name: Upload APK Artifact
-    uses: actions/upload-artifact@v4
-    with:
-      name: frida-launcher-debug-apk
-      path: app/build/outputs/apk/debug/app-debug.apk
-      retention-days: 7 # Giữ tệp trong 7 ngày
+      # Bước 4: Cấp quyền thực thi cho Gradle Wrapper
+      - name: Grant Execute Permission to gradlew
+        run: chmod +x gradlew
+
+      # Bước 5: Thực hiện lệnh build Debug APK
+      - name: Assemble Debug Build
+        run: ./gradlew assembleDebug
+
+      # Bước 6: Tải file APK đã build lên làm Artifact
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frida-launcher-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
