@@ -1,3 +1,4 @@
+# Khối steps phải được đặt thụt lề ngay dưới job 'build'
 steps:
   # Bước 1: Tải mã nguồn từ repository
   - name: Checkout Code
